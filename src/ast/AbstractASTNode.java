@@ -2,20 +2,22 @@ package ast;
 
 public class AbstractASTNode implements ASTNode {
 
-    int line;
-    int column;
+    private int line;
+    private int column;
 
     public AbstractASTNode(int line, int column) {
         this.line = line;
         this.column = column;
     }
 
+
+    @Override
     public int getLine() {
         return this.line;
     }
 
+    @Override
     public int getColumn() {
-        return this.getColumn();
+        return this.column;
     }
-
 }

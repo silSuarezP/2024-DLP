@@ -13,4 +13,9 @@ public class RecordFieldType extends AbstractType {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "RecordField { type: " + this.type + ", name: " + this.name + " }" ;
+    }
+
 }

@@ -10,33 +10,69 @@ grammar Cmm;
 }
 
 
-program: definitions* main_function;
-
-
-definitions: variable_definition
-    | function_definition
+program returns [Program ast] locals [List<Definition> defs = new ArrayList<Definition>()]:
+    (d=definitions
+            { $defs.addAll($d.ast); }
+    )*
+    m=main_function
+           { $defs.add($m.ast); }
+           { $ast = new Program($defs.get(0).getLine(),$defs.get(0).getColumn(), $defs); }
     ;
 
-variable_definition: type ID (',' ID)* ';'
-                   ;
-
-function_definition: function_return_type ID '(' function_parameters* ')' function_body
-                   ;
-
-function_parameters: built_in_type ID (',' built_in_type ID)*
-                   ;
-
-function_body: '{' ( variable_definition)* (statement )*  '}'
-             ;
 
 
-function_return_type: built_in_type
-                    | 'void'
-                    ;
+definitions returns [List<Definition> ast = new ArrayList<Definition>()]:
+    v=variable_definition
+            { $ast.addAll($v.ast); }
+    | f=function_definition
+            { $ast.add($f.ast); }
+    ;
+
+variable_definition returns [List<VarDefinition> ast = new ArrayList<VarDefinition>();]:
+    t=type ID1=ID
+            { $ast.add(new VarDefinition($t.ast.getLine(), $t.ast.getColumn(), $t.ast, $ID1.text)); }
+    (',' ID2=ID
+        { $ast.add(new VarDefinition($t.ast.getLine(), $t.ast.getColumn(), $t.ast, $ID2.text)); }
+    )* ';'
+    ;
+
+function_definition returns [FunctionDefinition ast]:
+    frt=function_return_type ID '(' fp=function_parameters')' fb=function_body
+            { $ast = new FunctionDefinition($frt.ast.getLine(), $frt.ast.getColumn(),
+                            new FunctionType($frt.ast.getLine(), $frt.ast.getColumn(), $frt.ast, $fp.ast), $ID.text, $fb.ast); }
+    ;
+
+function_parameters returns [List<VarDefinition> ast = new ArrayList<VarDefinition>();]:
+
+    | t1=built_in_type ID1=ID
+            { $ast.add(new VarDefinition($t1.ast.getLine(), $t1.ast.getColumn(), $t1.ast, $ID1.text)); }
+    (',' t2=built_in_type ID2=ID
+            { $ast.add(new VarDefinition($t2.ast.getLine(), $t2.ast.getColumn(), $t2.ast, $ID2.text)); }
+    )* ;
+
+function_body returns [List<Statement> ast = new ArrayList<Statement>();]:
+    '{' ( vd=variable_definition
+            { $ast.addAll($vd.ast); }
+    )* (st=statement
+            { $ast.addAll($st.ast); }
+    )*  '}'
+    ;
 
 
-main_function: 'void' 'main' '(' ')' function_body EOF
-             ;
+function_return_type returns [Type ast]:
+    t=built_in_type
+            { $ast = $t.ast; }
+    | T='void'
+            { $ast = new VoidType($T.getLine(), $T.getCharPositionInLine()+1); }
+    ;
+
+
+main_function returns [FunctionDefinition ast]:
+    T='void' 'main' '(' ')' fb=function_body EOF
+            { $ast = new FunctionDefinition($T.getLine(), $T.getCharPositionInLine()+1,
+                            new FunctionType($T.getLine(), $T.getCharPositionInLine()+1,
+                                new VoidType($T.getLine(), $T.getCharPositionInLine()+1), new ArrayList<VarDefinition>()), "main", $fb.ast); }
+    ;
 
 
 
@@ -58,10 +94,10 @@ expression returns [Expression ast]:
     ID { $ast = new Variable($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text); }
     | IC=INT_CONSTANT
             { $ast = new IntLiteral($IC.getLine(), $IC.getCharPositionInLine()+1, LexerHelper.lexemeToInt($IC.text)); }
-    | REAL_CONSTANT
-            { $ast = new DoubleLiteral($IC.getLine(), $IC.getCharPositionInLine()+1, LexerHelper.lexemeToReal($IC.text)); }
-    | CHAR_CONSTANT
-            { $ast = new CharLiteral($IC.getLine(), $IC.getCharPositionInLine()+1, LexerHelper.lexemeToChar($IC.text)); }
+    | RC=REAL_CONSTANT
+            { $ast = new DoubleLiteral($RC.getLine(), $RC.getCharPositionInLine()+1, LexerHelper.lexemeToReal($RC.text)); }
+    | CC=CHAR_CONSTANT
+            { $ast = new CharLiteral($CC.getLine(), $CC.getCharPositionInLine()+1, LexerHelper.lexemeToChar($CC.text)); }
     | '(' e=expression ')' // parenthesis
             { $ast = $e.ast; }
     | e1=expression '[' e2=expression ']' // indexing
@@ -72,7 +108,7 @@ expression returns [Expression ast]:
             { $ast = new Cast($t.ast.getLine(), $t.ast.getColumn(), $t.ast, $e.ast); }
     | '-' e=expression // unary minus
              { $ast = new UnaryMinus($e.ast.getLine(), $e.ast.getColumn(), $e.ast); }
-    | '!' expression // unary not
+    | '!' e=expression // unary not
             { $ast = new UnaryNot($e.ast.getLine(), $e.ast.getColumn(), $e.ast); }
     | e1=expression OP=('*'|'/'|'%') e2=expression // mult. div. and mod.
             { $ast = new Arithmetic($e1.ast.getLine(), $e1.ast.getColumn()+1, $e1.ast, $OP.text, $e2.ast); }
@@ -110,21 +146,38 @@ return
 while
 function invocation
 */
-statement: expression '=' expression ';'
-         | 'while' '(' expression ')' block
-         | 'if' '(' expression ')' block // if statement
-         | 'if' '(' expression ')' block 'else' block // if-else statement
-         | 'write' arguments ';'
-         | 'read' arguments ';'
-         | 'return' expression ';'
-         | ID '(' optional_arguments ')' ';' // function invocation
-         ;
+statement returns [List<Statement> ast = new ArrayList<Statement>();]:
+    e1=expression '=' e2=expression ';'
+            { $ast.add(new Assignment($e1.ast.getLine(), $e1.ast.getColumn(), $e1.ast, $e2.ast)); }
+    | 'while' '(' e=expression ')' b=block
+            { $ast.add(new While($e.ast.getLine(), $e.ast.getColumn(), $e.ast, $b.ast)); }
+    | 'if' '(' e=expression ')' b=block // if statement
+            { $ast.add(new IfElse($e.ast.getLine(), $e.ast.getColumn(), $e.ast, $b.ast)); }
+    | 'if' '(' e=expression ')' b1=block 'else' b2=block // if-else statement
+            { $ast.add(new IfElse($e.ast.getLine(), $e.ast.getColumn(), $e.ast, $b1.ast, $b2.ast)); }
+    | 'write' e1=expression
+            { $ast.add(new Write($e1.ast.getLine(), $e1.ast.getColumn(), $e1.ast));  }
+    (',' e2=expression
+            { $ast.add(new Write($e2.ast.getLine(), $e2.ast.getColumn(), $e2.ast));  }
+    )* ';'
+    | 'read' e1=expression
+            { $ast.add(new Read($e1.ast.getLine(), $e1.ast.getColumn(), $e1.ast));  }
+     (',' e2=expression
+            { $ast.add(new Read($e2.ast.getLine(), $e2.ast.getColumn(), $e2.ast));  }
+     )* ';'
+    | 'return' e=expression ';'
+            { $ast.add(new Return($e.ast.getLine(), $e.ast.getColumn(), $e.ast));  }
+    | ID '(' oa=optional_arguments ')' ';' // function invocation
+            { $ast.add(new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text, $oa.ast)); }
+    ;
 
-arguments: expression (',' expression)* ;
-
-block: statement
-     | '{' statement* '}'
-     ;
+block returns [List<Statement> ast = new ArrayList<Statement>();]:
+    s1=statement
+            { $ast.addAll($s1.ast); }
+    | '{' (s2=statement
+            { $ast.addAll($s2.ast); }
+    )* '}'
+    ;
 
 
 
@@ -150,7 +203,7 @@ type returns [Type ast]:
     b = built_in_type
         { $ast = $b.ast; }
     | t=type '[' IC=INT_CONSTANT ']'
-        { $ast = new ArrayType($t.ast.getLine(), $t.ast.getColumn(), LexerHelper.lexemeToInt($IC.text)); }
+        { $ast = ArrayType.createArray($t.ast.getLine(), $t.ast.getColumn(), $t.ast, LexerHelper.lexemeToInt($IC.text)); }
     | S='struct' '{' ( fd=field_definition )+ '}'
         { $ast = new Struct($S.getLine(), $S.getCharPositionInLine()+1, $fd.ast); }
     ;
