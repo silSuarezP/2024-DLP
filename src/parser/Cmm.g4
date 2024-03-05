@@ -16,7 +16,9 @@ program returns [Program ast] locals [List<Definition> defs = new ArrayList<Defi
     )*
     m=main_function
            { $defs.add($m.ast); }
-           { $ast = new Program($defs.get(0).getLine(),$defs.get(0).getColumn(), $defs); }
+           { $ast = new Program($defs.get(0).getLine(), $defs.get(0).getColumn(), $defs); }
+
+    EOF
     ;
 
 
@@ -57,6 +59,11 @@ function_body returns [List<Statement> ast = new ArrayList<Statement>();]:
             { $ast.addAll($st.ast); }
     )*  '}'
     ;
+    /*
+        We can also create a DTO so we don't need to change the design (this is, to make VarDefinition implement
+        Statement).
+        So the DTO is a new class that "considers" VarDefinition and Statements as well.
+    */
 
 
 function_return_type returns [Type ast]:
@@ -111,7 +118,7 @@ expression returns [Expression ast]:
     | '!' e=expression // unary not
             { $ast = new UnaryNot($e.ast.getLine(), $e.ast.getColumn(), $e.ast); }
     | e1=expression OP=('*'|'/'|'%') e2=expression // mult. div. and mod.
-            { $ast = new Arithmetic($e1.ast.getLine(), $e1.ast.getColumn()+1, $e1.ast, $OP.text, $e2.ast); }
+            { $ast = Arithmetic.createArithmetic($e1.ast.getLine(), $e1.ast.getColumn()+1, $e1.ast, $OP.text, $e2.ast); }
     | e1=expression OP=('+'|'-') e2=expression // addition and substraction
             { $ast = new Arithmetic($e1.ast.getLine(), $e1.ast.getColumn()+1, $e1.ast, $OP.text, $e2.ast); }
     | e1=expression OP=('>'|'>='|'<'|'<='|'!='|'==') e2=expression // comparison
@@ -199,25 +206,25 @@ built_in_type returns [Type ast]:
             { $ast = new CharType($T.getLine(), $T.getCharPositionInLine()+1); }
     ;
 
-type returns [Type ast]:
+type returns [Type ast] locals [List<RecordFieldType> records = new ArrayList<RecordFieldType>();]:
     b = built_in_type
         { $ast = $b.ast; }
     | t=type '[' IC=INT_CONSTANT ']'
         { $ast = ArrayType.createArray($t.ast.getLine(), $t.ast.getColumn(), $t.ast, LexerHelper.lexemeToInt($IC.text)); }
-    | S='struct' '{' ( fd=field_definition )+ '}'
-        { $ast = new Struct($S.getLine(), $S.getCharPositionInLine()+1, $fd.ast); }
+    | S='struct' '{' ( fd=field_definitions { $records.addAll($fd.ast);})+ '}'
+        { $ast = new Struct($S.getLine(), $S.getCharPositionInLine()+1, $records); }
     ;
 
 
-field_definition returns [List<RecordFieldType> ast = new ArrayList<RecordFieldType>();]:
+field_definitions returns [List<RecordFieldType> ast = new ArrayList<RecordFieldType>();]:
     t=type ID1=ID
             { $ast.add(new RecordFieldType($t.ast.getLine(), $t.ast.getColumn(), $t.ast, $ID1.text)); }
-    ( (',' ID2=ID
+    (
+    (',' ID2=ID
             { $ast.add(new RecordFieldType($t.ast.getLine(), $t.ast.getColumn(), $t.ast, $ID2.text)); }
-    )* ';')*
+    )*
+    ';')*
     ;
-
-
 
 
 
