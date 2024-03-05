@@ -5,6 +5,11 @@ import ast.AbstractASTNode;
 public class RecordFieldType extends AbstractType {
 
     private Type type;
+
+    public String getName() {
+        return name;
+    }
+
     private String name;
 
     public RecordFieldType(int line, int column, Type type, String name) {

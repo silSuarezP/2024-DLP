@@ -126,7 +126,11 @@ expression returns [Expression ast]:
     | e1=expression OP=('&&'|'||') e2=expression // logical
             { $ast = new Logical($e1.ast.getLine(), $e1.ast.getColumn()+1, $e1.ast, $OP.text, $e2.ast); }
     | ID '(' oa=optional_arguments ')' // function invocation
-            { $ast = new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text, $oa.ast); }
+            {
+                $ast = new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1,
+                new Variable($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text),
+                $oa.ast);
+             }
     ;
 
 
@@ -175,7 +179,11 @@ statement returns [List<Statement> ast = new ArrayList<Statement>();]:
     | 'return' e=expression ';'
             { $ast.add(new Return($e.ast.getLine(), $e.ast.getColumn(), $e.ast));  }
     | ID '(' oa=optional_arguments ')' ';' // function invocation
-            { $ast.add(new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text, $oa.ast)); }
+            {
+                $ast.add(new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1,
+                new Variable($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text),
+                $oa.ast));
+            }
     ;
 
 block returns [List<Statement> ast = new ArrayList<Statement>();]:
