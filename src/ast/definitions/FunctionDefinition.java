@@ -1,7 +1,8 @@
 package ast.definitions;
 
 import ast.Statement;
-import ast.types.Type;
+import ast.Type;
+import semantic.Visitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,11 @@ public class FunctionDefinition extends AbstractDefinition {
         this.funcBody = new ArrayList<Statement>(body);
     }
 
+    public List<Statement> getFuncBody() {
+        return this.funcBody;
+    }
+
+
     @Override
     public Type getType() {
         return this.type;
@@ -38,5 +44,11 @@ public class FunctionDefinition extends AbstractDefinition {
             str += " statements: " + this.funcBody;
         }
         return str+=" }\n";
+    }
+
+
+    @Override
+    public <TP, TR> TR accept(Visitor<TP, TR> v, TP param) {
+        return v.visit(this, param);
     }
 }

@@ -7,8 +7,10 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import parser.CmmLexer;
 import parser.CmmParser;
+import semantic.TypeCheckingVisitor;
+import semantic.Visitor;
 
-public class MainLab06 {
+public class MainLab07 {
 
     public static void main(String... args) throws Exception {
         if (args.length < 1) {
@@ -26,7 +28,16 @@ public class MainLab06 {
         CmmParser parser = new CmmParser(tokens);
 
 
+
+
         Program ast = parser.program().ast;
+
+        Visitor v = new TypeCheckingVisitor();
+        v.visit(ast, null);
+//        ast.accept(new TypeCheckingVisitor(), null);
+
+        System.out.println("errors?" + ErrorHandler.getInstance().anyErrors());
+
         if (ErrorHandler.getInstance().anyErrors())
             ErrorHandler.getInstance().showErrors(System.err);
         else {

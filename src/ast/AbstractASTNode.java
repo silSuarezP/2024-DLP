@@ -1,5 +1,7 @@
 package ast;
 
+import semantic.Visitor;
+
 public class AbstractASTNode implements ASTNode {
 
     private int line;
@@ -20,4 +22,10 @@ public class AbstractASTNode implements ASTNode {
     public int getColumn() {
         return this.column;
     }
+
+    @Override
+    public <TP, TR> TR accept(Visitor<TP, TR> v, TP param) {
+        return null;
+    }
+
 }
