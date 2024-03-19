@@ -122,6 +122,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
         return null;
     }
 
+
     @Override
     public Void visit(Variable variable, Void param) {
         // lvalue true

@@ -27,6 +27,15 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     }
 
     @Override
+    public TR visit(Indexing indexing, TP param) {
+        // first we need to traverse the children
+        indexing.getArray().accept(this, null);
+        indexing.getIndex().accept(this, null);
+
+        return null;
+    }
+
+    @Override
     public TR visit(Read readSt, TP param) {
         readSt.getExpr().accept(this, param);
         return null;
@@ -59,6 +68,17 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
         return null;
     }
 
+    @Override
+    public TR visit(Assignment assignment, TP param) {
+        // traverse and accept
+        assignment.getLeft().accept(this, null);
+        assignment.getRight().accept(this, null);
+
+        return null;
+    }
+
+
+
 
 
     ///////////////// EXPRESSIONS
@@ -76,8 +96,7 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     public TR visit(FunctionDefinition funcDefinition, TP param) {
         funcDefinition.getFuncBody().forEach(p -> p.accept(this, param));
 
-        // TODO ASK!!!!!!
-        ((FunctionType) funcDefinition.getType()).getParams().forEach(b -> b.accept(this, param));
+        funcDefinition.getType().getParams().forEach(b -> b.accept(this, param));
         return null;
     }
 
@@ -99,8 +118,16 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     }
 
     @Override
+    public TR visit(FieldAccess fieldAccess, TP param) {
+        fieldAccess.getStruct().accept(this, param);
+
+        return null;
+    }
+
+    @Override
     public TR visit(FunctionInvocation functionInvocation, TP param) {
         functionInvocation.getParams().forEach(p -> p.accept(this, param));
+        functionInvocation.getFunction().accept(this, null);
 
         // lvalue false
         functionInvocation.setlValue(false);
@@ -144,7 +171,7 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     }
 
     @Override
-    public TR visit(Variable e, TP param) {
+    public TR visit(Variable variable, TP param) {
         return null;
     }
 

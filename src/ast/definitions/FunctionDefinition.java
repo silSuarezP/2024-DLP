@@ -2,21 +2,21 @@ package ast.definitions;
 
 import ast.Statement;
 import ast.Type;
+import ast.types.FunctionType;
 import semantic.Visitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class FunctionDefinition extends AbstractDefinition {
 
-    private Type type;
-    private Type returnType;
+    private FunctionType type;
     private String name;
     private List<Statement> funcBody;
 
-    public FunctionDefinition(int line, int column, Type type, String name, List<Statement> body) {
+    public FunctionDefinition(int line, int column, FunctionType type, String name, List<Statement> body) {
         super(line, column);
-        this.returnType = returnType;
         this.type = type;
         this.name = name;
         this.funcBody = new ArrayList<Statement>(body);
@@ -28,7 +28,7 @@ public class FunctionDefinition extends AbstractDefinition {
 
 
     @Override
-    public Type getType() {
+    public FunctionType getType() {
         return this.type;
     }
 
