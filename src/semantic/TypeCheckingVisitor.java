@@ -11,6 +11,173 @@ import errorhandler.ErrorHandler;
 public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
 
 
+    /**
+     ****************** EXPRESSIONS
+     * (P)
+     *      Arithmetic: expression1 -> expression2 expression3
+     * (R)
+     *      expression1.type = expression2.type.arithmetic(expression3.type);
+     *
+     *
+     *
+     * (P)
+     *      Cast: expression1 -> type expression2
+     * (R)
+     *      expression1.type = expression2.type.castTo(type)
+     *
+     *
+     *
+     * (P)
+     *      Comparison: expression1 -> expression2 expression3
+     * (R)
+     *      expression1.type = expression2.type.comparison(expression3.type)
+     *
+     *
+     *
+     * (P)
+     *      FieldAccess: expression1 -> expression2 ID
+     * (R)
+     *      expression1.type = expression2.type.dot(ID)
+     *
+     *
+     *
+     * (P)
+     *      FunctionInvocation: expression1 -> expression2 expression*
+     * (R)
+     *      expression1.type = expression2.type.parenthesis(
+     *              expression*.stream().map(exp -> exp.type).toArray())
+     *
+     *
+     *
+     * (P)
+     *      Indexing: expression1 -> expression2 expression3
+     * (R)
+     *      expression1.type = expression2.type.squareBrackets(expression3.type)
+     *
+     *
+     *
+     * (P)
+     *      Logical: expression1 -> expression2 expression3
+     * (R)
+     *      expression1.type = expression2.type.logical(expression3.type)
+     *
+     *
+     *
+     * (P)
+     *      Modulus: expression1 -> expression2 expression3
+     * (R)
+     *      expression1.type = expression2.type.modulus(expression3.type);
+     *
+     *
+     *
+     * (P)
+     *      UnaryMinus: expression1 -> expression2
+     * (R)
+     *      expression1.type = expression2.type.toUnaryMinus();
+     *
+     *
+     *
+     * (P)
+     *      UnaryNot: expression1 -> expression2
+     * (R)
+     *      expression1.type = expression2.type.toUnaryNot();
+     *
+     *
+     *
+     * (P)
+     *      Variable: expression -> ID
+     * (R)
+     *      if (expression.definition == null)
+     *          expression.type = new ErrorType(expression.getLine(), expression.getColumn(),
+     *                     "There is no definition for variable " + ID))
+     *      else
+     *          expression.type = expression.definition.type
+     *
+     *
+     *
+     ****************** STATEMENTS
+     * (P)
+     *      Assignment: statement -> expression1 expression2
+     * (R)
+     *      expression2.type.assignedTo(expression1.type)
+     *
+     *
+     *
+     * (P)
+     *      IfElse: statement -> expression statement*
+     * (R)
+     *      expression.type.mustBeBoolean()
+     *
+     *
+     *
+     * (P)
+     *      Read: statement -> expression
+     * (R)
+     *      expression.type.mustBeReadable()
+     *
+     *
+     *
+     * (P)
+     *      Return: statement -> expression
+     * (R)
+     *      expression.type.mustBeReturnableAs(statement.returnType)
+     *
+     *
+     *
+     * (P)
+     *      While: statement -> expression statement*
+     * (R)
+     *      expression.type.mustBeBoolean()
+     *
+     *
+     *
+     * (P)
+     *      Write: statement -> expression
+     * (R)
+     *      expression.type.mustBeWritable()
+     *
+     *
+     *
+     * (P)
+     *      FunctionInvocation: statement -> expression expression*
+     * (R)
+     *      expression.type.parenthesis(expression*.stream().map(exp -> exp.type).toArray())
+     *
+     *
+     *
+     * (P)
+     *      WhileStmt: statement -> expression statement2*
+     * (R)
+     *      expression.type.mustBeBoolean()
+     *
+     *
+     *
+     ****************** LITERALS
+     *
+     * (P)
+     *      IntLiteral: expression -> INT_CONSTANT
+     * (R)
+     *      expression.type = new IntType()
+     *
+     *
+     *
+     * (P)
+     *      CharLiteral: expression -> CHAR_CONSTANT
+     * (R)
+     *      expression.type = new CharType()
+     *
+     *
+     *
+     * (P)
+     *      DoubleLiteral: expression -> REAL_CONSTANT
+     * (R)
+     *      expression.type = new DoubleType()
+     *
+     */
+
+
+
+
     @Override
     public Void visit(Assignment assignment, Void param) {
         // traverse and accept
@@ -38,7 +205,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
     public Void visit(Write writeSt, Void param) {
         writeSt.getExpr().accept(this, param);
         if (!writeSt.getExpr().getlValue())
-            new ErrorType(writeSt.getExpr().getLine(),writeSt.getExpr().getColumn(),
+            new ErrorType(writeSt.getExpr().getLine(), writeSt.getExpr().getColumn(),
                     "L-value required");
         return null;
     }
