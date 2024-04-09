@@ -7,10 +7,7 @@ import ast.expressions.literals.CharLiteral;
 import ast.expressions.literals.DoubleLiteral;
 import ast.expressions.literals.IntLiteral;
 import ast.statements.*;
-import ast.types.CharType;
-import ast.types.ErrorType;
-import ast.types.FunctionType;
-import ast.types.IntType;
+import ast.types.*;
 import errorhandler.ErrorHandler;
 
 import java.util.List;
@@ -20,169 +17,168 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
 
 
     /**
-     ****************** EXPRESSIONS
+     * ***************** EXPRESSIONS
      * (P)
-     *      Arithmetic: expression1 -> expression2 expression3
+     * Arithmetic: expression1 -> expression2 expression3
      * (R)
-     *      expression1.type = expression2.type.arithmetic(expression3.type);
-     *
-     *
-     *
-     * (P)
-     *      Cast: expression1 -> type expression2
-     * (R)
-     *      expression1.type = expression2.type.castTo(type)
+     * expression1.type = expression2.type.arithmetic(expression3.type);
      *
      *
      *
      * (P)
-     *      Comparison: expression1 -> expression2 expression3
+     * Cast: expression1 -> type expression2
      * (R)
-     *      expression1.type = expression2.type.comparison(expression3.type)
+     * expression1.type = expression2.type.castTo(type)
      *
      *
      *
      * (P)
-     *      FieldAccess: expression1 -> expression2 ID
+     * Comparison: expression1 -> expression2 expression3
      * (R)
-     *      expression1.type = expression2.type.dot(ID)
+     * expression1.type = expression2.type.comparison(expression3.type)
      *
      *
      *
      * (P)
-     *      FunctionInvocation: expression1 -> expression2 expression*
+     * FieldAccess: expression1 -> expression2 ID
      * (R)
-     *      expression1.type = expression2.type.parenthesis(
-     *              expression*.stream().map(exp -> exp.type).toArray())
+     * expression1.type = expression2.type.dot(ID)
      *
      *
      *
      * (P)
-     *      Indexing: expression1 -> expression2 expression3
+     * FunctionInvocation: expression1 -> expression2 expression*
      * (R)
-     *      expression1.type = expression2.type.squareBrackets(expression3.type)
+     * expression1.type = expression2.type.parenthesis(
+     * expression*.stream().map(exp -> exp.type).toArray())
      *
      *
      *
      * (P)
-     *      Logical: expression1 -> expression2 expression3
+     * Indexing: expression1 -> expression2 expression3
      * (R)
-     *      expression1.type = expression2.type.logical(expression3.type)
+     * expression1.type = expression2.type.squareBrackets(expression3.type)
+     *
      *
      *
      *
      * (P)
-     *      Modulus: expression1 -> expression2 expression3
+     * Logical: expression1 -> expression2 expression3
      * (R)
-     *      expression1.type = expression2.type.modulus(expression3.type);
+     * expression1.type = expression2.type.logical(expression3.type)
      *
      *
      *
      * (P)
-     *      UnaryMinus: expression1 -> expression2
+     * Modulus: expression1 -> expression2 expression3
      * (R)
-     *      expression1.type = expression2.type.toUnaryMinus();
+     * expression1.type = expression2.type.modulus(expression3.type);
      *
      *
      *
      * (P)
-     *      UnaryNot: expression1 -> expression2
+     * UnaryMinus: expression1 -> expression2
      * (R)
-     *      expression1.type = expression2.type.toUnaryNot();
+     * expression1.type = expression2.type.toUnaryMinus();
      *
      *
      *
      * (P)
-     *      Variable: expression -> ID
+     * UnaryNot: expression1 -> expression2
      * (R)
-     *      if (expression.definition == null)
-     *          expression.type = new ErrorType(expression.getLine(), expression.getColumn(),
-     *                     "There is no definition for variable " + ID))
-     *      else
-     *          expression.type = expression.definition.type
-     *
-     *
-     *
-     ****************** STATEMENTS
-     * (P)
-     *      Assignment: statement -> expression1 expression2
-     * (R)
-     *      expression2.type.assignedTo(expression1.type)
+     * expression1.type = expression2.type.toUnaryNot();
      *
      *
      *
      * (P)
-     *      IfElse: statement -> expression statement*
+     * Variable: expression -> ID
      * (R)
-     *      expression.type.mustBeBoolean()
+     * if (expression.definition == null)
+     * expression.type = new ErrorType(expression.getLine(), expression.getColumn(),
+     * "There is no definition for variable " + ID))
+     * else
+     * expression.type = expression.definition.type
+     *
+     *
+     *
+     * ***************** STATEMENTS
+     * (P)
+     * Assignment: statement -> expression1 expression2
+     * (R)
+     * expression2.type.assignedTo(expression1.type)
      *
      *
      *
      * (P)
-     *      Read: statement -> expression
+     * IfElse: statement -> expression statement*
      * (R)
-     *      expression.type.mustBeReadable()
+     * expression.type.mustBeBoolean()
      *
      *
      *
      * (P)
-     *      Return: statement -> expression
+     * Read: statement -> expression
      * (R)
-     *      expression.type.mustBeReturnableAs(statement.returnType)
+     * expression.type.mustBeReadable()
      *
      *
      *
      * (P)
-     *      While: statement -> expression statement*
+     * Return: statement -> expression
      * (R)
-     *      expression.type.mustBeBoolean()
+     * expression.type.mustBeReturnableAs(statement.returnType)
      *
      *
      *
      * (P)
-     *      Write: statement -> expression
+     * While: statement -> expression statement*
      * (R)
-     *      expression.type.mustBeWritable()
+     * expression.type.mustBeBoolean()
      *
      *
      *
      * (P)
-     *      FunctionInvocation: statement -> expression expression*
+     * Write: statement -> expression
      * (R)
-     *      expression.type.parenthesis(expression*.stream().map(exp -> exp.type).toArray())
+     * expression.type.mustBeWritable()
      *
      *
      *
      * (P)
-     *      WhileStmt: statement -> expression statement2*
+     * FunctionInvocation: statement -> expression expression*
      * (R)
-     *      expression.type.mustBeBoolean()
-     *
-     *
-     *
-     ****************** LITERALS
-     *
-     * (P)
-     *      IntLiteral: expression -> INT_CONSTANT
-     * (R)
-     *      expression.type = new IntType()
+     * expression.type.parenthesis(expression*.stream().map(exp -> exp.type).toArray())
      *
      *
      *
      * (P)
-     *      CharLiteral: expression -> CHAR_CONSTANT
+     * WhileStmt: statement -> expression statement2*
      * (R)
-     *      expression.type = new CharType()
+     * expression.type.mustBeBoolean()
+     *
+     *
+     *
+     * ***************** LITERALS
+     *
+     * (P)
+     * IntLiteral: expression -> INT_CONSTANT
+     * (R)
+     * expression.type = new IntType()
      *
      *
      *
      * (P)
-     *      DoubleLiteral: expression -> REAL_CONSTANT
+     * CharLiteral: expression -> CHAR_CONSTANT
      * (R)
-     *      expression.type = new DoubleType()
+     * expression.type = new CharType()
      *
+     *
+     *
+     * (P)
+     * DoubleLiteral: expression -> REAL_CONSTANT
+     * (R)
+     * expression.type = new DoubleType()
      */
-
 
 
     @Override
@@ -193,8 +189,8 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
 
         // lvalue depends on the left child
         if (!assignment.getLeft().getlValue())
-            ErrorHandler.getInstance().addError(new ErrorType(assignment.getLine(), assignment.getColumn(),
-                    "The left hand side of the assignment is not an lValue."));
+            new ErrorType(assignment.getLine(), assignment.getColumn(),
+                    "The left hand side of the assignment is not an lValue.");
 
         assignment.getLeft().getType().assign(assignment.getRight().getType(), assignment.getLine(), assignment.getColumn());
 
@@ -206,7 +202,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
         readSt.getExpr().accept(this, param);
 
         if (!readSt.getExpr().getlValue())
-            new ErrorType(readSt.getExpr().getLine(),readSt.getExpr().getColumn(),
+            new ErrorType(readSt.getExpr().getLine(), readSt.getExpr().getColumn(),
                     "L-value required");
 
         readSt.getExpr().getType().readable(readSt.getExpr().getLine(), readSt.getExpr().getColumn());
@@ -228,7 +224,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
 
     @Override
     public Void visit(Cast cast, Void param) {
-        cast.getCastType().accept(this,param);
+        cast.getCastType().accept(this, param);
         cast.getExpr().accept(this, param);
 
         cast.setlValue(false);
@@ -323,6 +319,9 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
     public Void visit(UnaryNot unaryNot, Void param) {
         unaryNot.getExpr().accept(this, param);
         unaryNot.setlValue(false);
+
+        unaryNot.setType(unaryNot.getExpr().getType().toUnaryMinus(unaryNot.getLine(), unaryNot.getColumn()));
+
         return null;
     }
 
@@ -332,11 +331,13 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
         // lvalue true
         variable.setlValue(true);
 
-        if (variable.getDefinition() == null)
+
+        if (variable.getDefinition() == null) {
             variable.setType(new ErrorType(variable.getLine(), variable.getColumn(),
-                    String.format("Variable %s not defined.", variable.getName())));
-        else
+                    String.format("Variable %s not defined.", variable.getName())));;
+        } else{
             variable.setType(variable.getDefinition().getType());
+        }
 
         return null;
     }
@@ -345,6 +346,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
     @Override
     public Void visit(FunctionInvocation functionInvocation, Void param) {
         functionInvocation.getParams().forEach(p -> p.accept(this, param));
+        functionInvocation.getFunction().accept(this, param);
 
         // lvalue false
         functionInvocation.setlValue(false);
@@ -354,11 +356,9 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
                 .map(exp -> exp.getType())
                 .collect(Collectors.toList());
 
-        functionInvocation.setType(functionInvocation.getFunction().getType().parenthesis(argumentTypes, functionInvocation.getLine(), functionInvocation.getColumn()) );
+        functionInvocation.setType(functionInvocation.getFunction().getType().parenthesis(argumentTypes, functionInvocation.getLine(), functionInvocation.getColumn()));
         return null;
     }
-
-
 
 
     @Override
@@ -381,7 +381,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
     public Void visit(DoubleLiteral doubleLiteral, Void param) {
         // lvalue false
         doubleLiteral.setlValue(false);
-        doubleLiteral.setType(new CharType(doubleLiteral.getLine(), doubleLiteral.getColumn()));
+        doubleLiteral.setType(new DoubleType(doubleLiteral.getLine(), doubleLiteral.getColumn()));
         return null;
     }
 
@@ -402,11 +402,50 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
     }
 
     @Override
+    public Void visit(IfElse ifElse, Void param) {
+        // first we need to traverse the children
+        ifElse.getCondition().accept(this, param);
+        ifElse.getIfBody().forEach(st -> st.accept(this, null));
+        ifElse.getElseBody().forEach(st -> st.accept(this, null));
+
+        ifElse.getCondition().getType().mustBeBoolean(ifElse.getCondition().getLine(), ifElse.getCondition().getColumn());
+
+        ifElse.getIfBody().forEach(st -> st.setReturnType(ifElse.getReturnType()));
+        ifElse.getElseBody().forEach(st -> st.setReturnType(ifElse.getReturnType()));
+
+        return null;
+    }
+
+    @Override
+    public Void visit(Return returnSt, Void param) {
+        // first we need to traverse the children
+        returnSt.getExpr().accept(this, null);
+
+        returnSt.getReturnType().isReturnable(returnSt.getExpr().getType(),
+                returnSt.getExpr().getLine(), returnSt.getExpr().getColumn());
+
+        return null;
+    }
+
+    @Override
+    public Void visit(While whileSt, Void param) {
+        // first we need to traverse the children
+        whileSt.getBody().forEach(st -> st.accept(this, null));
+        whileSt.getCondition().accept(this, null);
+
+        whileSt.getCondition().getType().mustBeBoolean(whileSt.getCondition().getLine(), whileSt.getCondition().getColumn());
+        whileSt.getBody().forEach(st -> st.setReturnType(whileSt.getReturnType()));
+
+        return null;
+    }
+
+    @Override
     public Void visit(FunctionDefinition funcDefinition, Void param) {
-        funcDefinition.getFuncBody().forEach(st -> st.setReturnType(((FunctionType)funcDefinition.getType()).getReturnType()));
-        funcDefinition.getFuncBody().forEach(st -> st.accept(this, null));
+        funcDefinition.getFuncBody().forEach(st -> st.setReturnType(((FunctionType) funcDefinition.getType()).getReturnType()));
 
         funcDefinition.getType().accept(this, param);
+
+        funcDefinition.getFuncBody().forEach(st -> st.accept(this, null));
 
         return null;
     }

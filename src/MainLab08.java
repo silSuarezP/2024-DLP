@@ -32,15 +32,14 @@ public class MainLab08 {
 
         Program ast = parser.program().ast;
 
-//        Visitor v = new TypeCheckingVisitor();
-//        v.visit(ast, null);
-
         Visitor v = new IdentificationVisitor();
+        v.visit(ast, null);
+
+        v = new TypeCheckingVisitor();
         v.visit(ast, null);
 
 
 
-        System.out.println("errors?" + ErrorHandler.getInstance().anyErrors());
 
         if (ErrorHandler.getInstance().anyErrors())
             ErrorHandler.getInstance().showErrors(System.err);

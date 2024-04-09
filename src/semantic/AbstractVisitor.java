@@ -87,16 +87,15 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
         cast.getCastType().accept(this, param);
         cast.getExpr().accept(this, param);
 
-        cast.setlValue(false);
 
         return null;
     }
 
     @Override
     public TR visit(FunctionDefinition funcDefinition, TP param) {
-        funcDefinition.getFuncBody().forEach(p -> p.accept(this, param));
+        funcDefinition.getType().accept(this, null);
 
-        funcDefinition.getType().getParams().forEach(b -> b.accept(this, param));
+        funcDefinition.getFuncBody().forEach(p -> p.accept(this, param));
         return null;
     }
 
@@ -112,7 +111,6 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
         comparison.getLeft().accept(this, param);
         comparison.getRight().accept(this, param);
 
-        comparison.setlValue(false);
 
         return null;
     }
@@ -129,8 +127,6 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
         functionInvocation.getParams().forEach(p -> p.accept(this, param));
         functionInvocation.getFunction().accept(this, null);
 
-        // lvalue false
-        functionInvocation.setlValue(false);
         return null;
     }
 
@@ -140,8 +136,6 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
         logical.getLeft().accept(this, null);
         logical.getRight().accept(this, null);
 
-        // set lvalue to false
-        logical.setlValue(false);
 
         return null;
     }
@@ -151,7 +145,6 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
         modulus.getLeft().accept(this, param);
         modulus.getRight().accept(this, param);
 
-        modulus.setlValue(false);
 
         return null;
     }
@@ -159,14 +152,12 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     @Override
     public TR visit(UnaryMinus unaryMinus, TP param) {
         unaryMinus.getExpr().accept(this, param);
-        unaryMinus.setlValue(false);
         return null;
     }
 
     @Override
     public TR visit(UnaryNot unaryNot, TP param) {
         unaryNot.getExpr().accept(this, param);
-        unaryNot.setlValue(false);
         return null;
     }
 
@@ -179,22 +170,16 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     ///////////////// LITERALS
     @Override
     public TR visit(IntLiteral intLiteral, TP param) {
-        // lvalue false
-        intLiteral.setlValue(false);
         return null;
     }
 
     @Override
     public TR visit(CharLiteral charLiteral, TP param) {
-        // lvalue false
-        charLiteral.setlValue(false);
         return null;
     }
 
     @Override
     public TR visit(DoubleLiteral doubleLiteral, TP param) {
-        // lvalue false
-        doubleLiteral.setlValue(false);
         return null;
     }
 

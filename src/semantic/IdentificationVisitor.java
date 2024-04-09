@@ -17,8 +17,8 @@ public class IdentificationVisitor extends AbstractVisitor<Void, Void> {
     @Override
     public Void visit(VarDefinition varDefinition, Void param) {
         if (!st.insert(varDefinition))
-            ErrorHandler.getInstance().addError(new ErrorType(varDefinition.getLine(), varDefinition.getColumn(),
-                    "There already exists a definition for variable " + varDefinition.getName()));
+            new ErrorType(varDefinition.getLine(), varDefinition.getColumn(),
+                    "There already exists a definition for variable " + varDefinition.getName());
         else
             varDefinition.getType().accept(this, param);
         return null;
@@ -28,8 +28,8 @@ public class IdentificationVisitor extends AbstractVisitor<Void, Void> {
     @Override
     public Void visit(FunctionDefinition funcDefinition, Void param) {
         if (!st.insert(funcDefinition))
-            ErrorHandler.getInstance().addError(new ErrorType(funcDefinition.getLine(), funcDefinition.getColumn(),
-                    "There already exists a definition for function " + funcDefinition.getName()));
+            new ErrorType(funcDefinition.getLine(), funcDefinition.getColumn(),
+                    "There already exists a definition for function " + funcDefinition.getName());
         else {
             st.set();
 
@@ -44,15 +44,10 @@ public class IdentificationVisitor extends AbstractVisitor<Void, Void> {
 
     @Override
     public Void visit(Variable variable, Void param) {
-        Definition def = st.find(variable.getName());
-        if (def != null) {
-            variable.setDefinition(def);
-        }
-        else {
-            ErrorHandler.getInstance().addError(new ErrorType(variable.getLine(), variable.getColumn(),
-                    "There is no definition for variable " + variable.getName()));
-        }
-
+        Definition definition = st.find(variable.getName());
+//        if (definition == null)
+//            new ErrorType(variable.getLine(),variable.getColumn(),"Variable not defined.");
+        variable.setDefinition(definition);
         return null;
     }
 }

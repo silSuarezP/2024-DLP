@@ -128,7 +128,7 @@ expression returns [Expression ast]:
     | ID '(' oa=optional_arguments ')' // function invocation
             {
                 $ast = new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1,
-                new Variable($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text),
+                $ID.text,
                 $oa.ast);
              }
     ;
@@ -181,7 +181,7 @@ statement returns [List<Statement> ast = new ArrayList<Statement>();]:
     | ID '(' oa=optional_arguments ')' ';' // function invocation
             {
                 $ast.add(new FunctionInvocation($ID.getLine(), $ID.getCharPositionInLine()+1,
-                new Variable($ID.getLine(), $ID.getCharPositionInLine()+1, $ID.text),
+                $ID.text,
                 $oa.ast));
             }
     ;

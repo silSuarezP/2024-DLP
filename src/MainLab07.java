@@ -34,9 +34,7 @@ public class MainLab07 {
 
         Visitor v = new TypeCheckingVisitor();
         v.visit(ast, null);
-//        ast.accept(new TypeCheckingVisitor(), null);
 
-        System.out.println("errors?" + ErrorHandler.getInstance().anyErrors());
 
         if (ErrorHandler.getInstance().anyErrors())
             ErrorHandler.getInstance().showErrors(System.err);

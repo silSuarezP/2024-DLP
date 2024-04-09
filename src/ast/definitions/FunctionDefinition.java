@@ -41,7 +41,7 @@ public class FunctionDefinition extends AbstractDefinition {
     public String toString() {
         String str = "FuncDefinition { type : " + this.type + " name: " + this.name;
         if (!this.funcBody.isEmpty()) {
-            str += " statements: " + this.funcBody;
+            str += "\n\tstatements: " + this.funcBody.toString();
         }
         return str+=" }\n";
     }
