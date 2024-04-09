@@ -356,7 +356,8 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
                 .map(exp -> exp.getType())
                 .collect(Collectors.toList());
 
-        functionInvocation.setType(functionInvocation.getFunction().getType().parenthesis(argumentTypes, functionInvocation.getLine(), functionInvocation.getColumn()));
+        functionInvocation.setType(functionInvocation.getFunction().getType().parenthesis(argumentTypes,
+                functionInvocation.getLine(), functionInvocation.getColumn()));
         return null;
     }
 

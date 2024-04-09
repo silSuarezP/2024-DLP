@@ -118,4 +118,10 @@ public class AbstractType extends AbstractASTNode implements Type {
                 "The type %s cannot be written.", this
         ));
     }
+
+    @Override
+    public int numberOfBytes() {
+        return 0;
+    }
+
 }

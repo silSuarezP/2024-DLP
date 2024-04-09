@@ -26,7 +26,6 @@ public class FunctionDefinition extends AbstractDefinition {
         return this.funcBody;
     }
 
-
     @Override
     public FunctionType getType() {
         return this.type;

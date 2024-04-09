@@ -40,16 +40,7 @@ public class CharType extends AbstractType  {
         ));
     }
 
-    @Override
-    public Type arithmetic(Type t, int line, int column) {
-        if (t instanceof ErrorType)
-            return t;
-        if (t instanceof CharType)
-            return this;
-        return new ErrorType(line, column, String.format(
-                "The type of %s does not support arithmetic operations with %s.", t, this
-        ));
-    }
+
 
     @Override
     public Type castTo(Type castType, int line, int column) {
@@ -96,5 +87,10 @@ public class CharType extends AbstractType  {
         new ErrorType(line, column, String.format(
                 "Cannot assign type %s to type %s.", type, this
         ));
+    }
+
+    @Override
+    public int numberOfBytes() {
+        return 1;
     }
 }

@@ -6,6 +6,7 @@ import semantic.Visitor;
 public class RecordFieldType extends AbstractType {
 
     private Type type;
+    private int offset;
 
     public String getName() {
         return name;
@@ -25,7 +26,7 @@ public class RecordFieldType extends AbstractType {
 
     @Override
     public String toString() {
-        return "RecordField { type: " + this.type + ", name: " + this.name + " }" ;
+        return "RecordField { type: " + this.type + ", name: " + this.name + ", offset: " + this.offset + " }" ;
     }
 
 
@@ -34,6 +35,13 @@ public class RecordFieldType extends AbstractType {
         return v.visit(this, param);
     }
 
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public int getOffset() {
+        return this.offset;
+    }
 
 
 }

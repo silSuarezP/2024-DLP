@@ -5,7 +5,6 @@ import ast.definitions.FunctionDefinition;
 import ast.definitions.VarDefinition;
 import ast.expressions.Variable;
 import ast.types.ErrorType;
-import errorhandler.ErrorHandler;
 import symboltable.SymbolTable;
 
 public class IdentificationVisitor extends AbstractVisitor<Void, Void> {

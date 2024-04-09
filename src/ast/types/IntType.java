@@ -111,4 +111,9 @@ public class IntType extends AbstractType {
     public void mustBeBoolean(int line, int column){
     }
 
+    @Override
+    public int numberOfBytes() {
+        return 2;
+    }
+
 }
