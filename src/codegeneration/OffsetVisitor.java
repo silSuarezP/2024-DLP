@@ -1,6 +1,7 @@
 package codegeneration;
 
 import ast.Program;
+import ast.Statement;
 import ast.definitions.FunctionDefinition;
 import ast.definitions.VarDefinition;
 import ast.expressions.*;
@@ -83,6 +84,8 @@ public class OffsetVisitor extends AbstractCGVisitor<Void, Void> {
      */
     @Override
     public Void visit(VarDefinition varDefinition, Void param) {
+        varDefinition.getType().accept(this, null);
+
         if (varDefinition.getScope() == 0) {
             varDefinition.setOffset(globalBytesSum);
             globalBytesSum += varDefinition.getOffset();
@@ -103,9 +106,12 @@ public class OffsetVisitor extends AbstractCGVisitor<Void, Void> {
      */
     @Override
     public Void visit(FunctionType functionType, Void param) {
+        functionType.getReturnType().accept(this, param);
+        functionType.getParams().forEach(p -> p.accept(this, param));
+
         int paramBytesSum = 0;
 
-        for (int i = functionType.getParams().size()-1; i >= 0; i++) {
+        for (int i = functionType.getParams().size()-1; i >= 0; i--) {
             VarDefinition vd = functionType.getParams().get(i);
             vd.setOffset(paramBytesSum + 4);
             paramBytesSum += vd.getType().numberOfBytes();
@@ -116,20 +122,27 @@ public class OffsetVisitor extends AbstractCGVisitor<Void, Void> {
 
 
     /**
-     *  (P) FunctionDefinition: definition -> type ID definition* statement*
+     *  (P) FunctionDefinition: definition -> type ID statement*
      *  (R) int localBytesSum = 0;
-     *      for (VarDefinition vd : definition*) {
-     *          localBytesSum = vd.type.numberOfBytes();
-     *          vd.offset = -localBytesSum;
+     *      for (Statement st: statement*) {
+     *          if (st instance of VarDefinition vd) {
+         *          localBytesSum = vd.type.numberOfBytes();
+         *          vd.offset = -localBytesSum;
+     *          }
      *      }
      */
     @Override
     public Void visit(FunctionDefinition funcDefinition, Void param) {
+        funcDefinition.getFuncBody().forEach(st -> st.accept(this, null));
+        funcDefinition.getType().accept(this, param);
+
         int localBytesSum = 0;
 
-        for (VarDefinition vd : funcDefinition.getType().getParams()) {
-            localBytesSum = vd.getType().numberOfBytes();
-            vd.setOffset(-localBytesSum);
+        for (Statement st : funcDefinition.getFuncBody()) {
+            if (st instanceof VarDefinition vd) {
+                localBytesSum = vd.getType().numberOfBytes();
+                vd.setOffset(-localBytesSum);
+            }
         }
 
         return null;
@@ -146,6 +159,8 @@ public class OffsetVisitor extends AbstractCGVisitor<Void, Void> {
      */
     @Override
     public Void visit(Struct struct, Void param) {
+        struct.getRecords().forEach(field -> field.accept(this, param));
+
         int fieldBytesSum = 0;
 
         for (RecordFieldType rf : struct.getRecords()) {

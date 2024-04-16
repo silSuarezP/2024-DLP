@@ -6,6 +6,8 @@ import semantic.Visitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FunctionType extends AbstractType {
 
@@ -40,5 +42,20 @@ public class FunctionType extends AbstractType {
         return v.visit(this, param);
     }
 
+
+    @Override
+    public Type parenthesis(List<Type> argTypes, int line, int column) {
+        if (argTypes.size() == getParams().size()) {
+            for (int i = 0; i < argTypes.size(); i++) {
+                if (!(argTypes.get(i).toString().equals(this.getParams().get(i).getType().toString()))) {
+                    return new ErrorType(line, column, String.format(
+                            "The types of %s do not match the parameters for invocation of function.", argTypes
+                    ));
+                }
+            }
+        }
+
+        return this.returnType;
+    }
 
 }

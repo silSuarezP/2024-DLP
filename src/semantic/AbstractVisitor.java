@@ -211,6 +211,7 @@ public abstract class AbstractVisitor<TP, TR> implements Visitor<TP, TR> {
     public TR visit(FunctionType functionType, TP param) {
         functionType.getReturnType().accept(this, param);
         functionType.getParams().forEach(p -> p.accept(this, param));
+
         return null;
     }
 

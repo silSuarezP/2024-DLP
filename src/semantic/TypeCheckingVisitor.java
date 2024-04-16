@@ -10,6 +10,7 @@ import ast.statements.*;
 import ast.types.*;
 import errorhandler.ErrorHandler;
 
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -320,7 +321,7 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
         unaryNot.getExpr().accept(this, param);
         unaryNot.setlValue(false);
 
-        unaryNot.setType(unaryNot.getExpr().getType().toUnaryMinus(unaryNot.getLine(), unaryNot.getColumn()));
+        unaryNot.setType(unaryNot.getExpr().getType().toUnaryNot(unaryNot.getLine(), unaryNot.getColumn()));
 
         return null;
     }
@@ -443,10 +444,9 @@ public class TypeCheckingVisitor extends AbstractVisitor<Void, Void> {
     @Override
     public Void visit(FunctionDefinition funcDefinition, Void param) {
         funcDefinition.getFuncBody().forEach(st -> st.setReturnType(((FunctionType) funcDefinition.getType()).getReturnType()));
+        funcDefinition.getFuncBody().forEach(st -> st.accept(this, null));
 
         funcDefinition.getType().accept(this, param);
-
-        funcDefinition.getFuncBody().forEach(st -> st.accept(this, null));
 
         return null;
     }

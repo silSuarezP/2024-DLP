@@ -124,4 +124,5 @@ public class AbstractType extends AbstractASTNode implements Type {
         return 0;
     }
 
+
 }

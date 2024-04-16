@@ -25,6 +25,15 @@ public interface Type extends ASTNode {
     void mustBeBoolean(int line, int column);
     void writable(int line, int column);
 
+    /**
+     * character - integer -> integer
+     * integer - integer -> integer
+     * double - integer -> double
+     *
+     */
+    Type superType(Type t, int line, int column);
+
     int numberOfBytes();
+
 
 }

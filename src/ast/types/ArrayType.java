@@ -63,13 +63,6 @@ public class ArrayType extends AbstractType {
         return result;
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(Type type) {
-        this.type = type;
-    }
 
     @Override
     public String toString() {
@@ -91,5 +84,14 @@ public class ArrayType extends AbstractType {
         return new ErrorType(line, column, String.format(
                 "The type of %s cannot be used as an index.", t));
     }
+
+    public Type getType() {
+        return this.type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
 
 }
