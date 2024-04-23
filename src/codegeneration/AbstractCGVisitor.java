@@ -13,6 +13,12 @@ import semantic.Visitor;
 
 public abstract class AbstractCGVisitor<TP, TR> implements Visitor<TP, TR> {
 
+    protected CodeGenerator cg;
+
+    public AbstractCGVisitor(CodeGenerator cg) {
+        this.cg = cg;
+    }
+
     ///////////////// STATEMENTS
     @Override
     public TR visit(Program program, TP param) {

@@ -18,6 +18,10 @@ public class Comparison extends AbstractExpression {
         this.right = right;
     }
 
+    public String getOperator() {
+        return operator;
+    }
+
     public Expression getLeft() {
         return this.left;
     }

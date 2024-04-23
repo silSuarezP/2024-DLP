@@ -13,6 +13,10 @@ public class IntLiteral extends AbstractExpression {
         this.value = value;
     }
 
+    public int getValue() {
+        return value;
+    }
+
     @Override
     public String toString() {
         return "Int: " + this.value;
@@ -22,4 +26,6 @@ public class IntLiteral extends AbstractExpression {
     public <TP, TR> TR accept(Visitor<TP, TR> v, TP param) {
         return v.visit(this, param);
     }
+
+
 }

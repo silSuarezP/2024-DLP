@@ -93,4 +93,25 @@ public class CharType extends AbstractType  {
     public int numberOfBytes() {
         return 1;
     }
+
+    @Override
+    public String suffix() {
+        return "b";
+    }
+
+    @Override
+    public String convertTo(Type to) {
+        if (to instanceof DoubleType)
+            return "b2i\n\ti2f";
+        else if (to instanceof IntType)
+            return "b2i";
+        return null;
+    }
+
+    @Override
+    public Type superType(Type type) {
+        if (type instanceof IntType || type instanceof DoubleType)
+            return type;
+        return this;
+    }
 }

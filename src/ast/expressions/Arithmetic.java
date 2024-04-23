@@ -32,6 +32,9 @@ public class Arithmetic extends AbstractExpression {
         return new Arithmetic(line, column, left, operator, right);
     }
 
+    public String getOperator() {
+        return operator;
+    }
 
     @Override
     public String toString() {

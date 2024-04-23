@@ -1,17 +1,12 @@
 package codegeneration;
 
-import ast.Program;
 import ast.Statement;
 import ast.definitions.FunctionDefinition;
 import ast.definitions.VarDefinition;
-import ast.expressions.*;
-import ast.expressions.literals.CharLiteral;
-import ast.expressions.literals.DoubleLiteral;
-import ast.expressions.literals.IntLiteral;
-import ast.statements.*;
 import ast.types.*;
+import semantic.AbstractVisitor;
 
-public class OffsetVisitor extends AbstractCGVisitor<Void, Void> {
+public class OffsetVisitor extends AbstractVisitor<Void, Void> {
 
 
     /**
@@ -116,6 +111,8 @@ public class OffsetVisitor extends AbstractCGVisitor<Void, Void> {
             vd.setOffset(paramBytesSum + 4);
             paramBytesSum += vd.getType().numberOfBytes();
         }
+
+        functionType.setBytesOfParams(paramBytesSum);
 
         return null;
     }

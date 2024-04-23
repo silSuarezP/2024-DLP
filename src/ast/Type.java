@@ -31,9 +31,13 @@ public interface Type extends ASTNode {
      * double - integer -> double
      *
      */
-    Type superType(Type t, int line, int column);
+    Type superType(Type t);
 
     int numberOfBytes();
 
 
+    String convertTo(Type to);
+
+
+    String suffix();
 }

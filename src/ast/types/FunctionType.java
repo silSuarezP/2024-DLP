@@ -14,6 +14,8 @@ public class FunctionType extends AbstractType {
     private List<VarDefinition> vars;
     private Type returnType;
 
+    private int bytesOfParams = 0;
+
     public FunctionType(int line, int column, Type returnType, List<VarDefinition> vars) {
         super(line, column);
         this.returnType = returnType;
@@ -56,6 +58,14 @@ public class FunctionType extends AbstractType {
         }
 
         return this.returnType;
+    }
+
+    public void setBytesOfParams(int offset){
+        this.bytesOfParams = offset;
+    }
+
+    public int getBytesOfParams(){
+        return this.bytesOfParams;
     }
 
 }

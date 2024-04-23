@@ -1,7 +1,16 @@
 package codegeneration;
 
-public class ValueCGVisitor {
+import ast.Type;
+import ast.expressions.*;
+import ast.expressions.literals.CharLiteral;
+import ast.expressions.literals.DoubleLiteral;
+import ast.expressions.literals.IntLiteral;
+
+public class ValueCGVisitor extends AbstractCGVisitor<Void, Void> {
+
+
     /**
+     ****************+ LAB11
      * ------ EXPRESSIONS
      * - integer literal
      * - character literal
@@ -100,5 +109,107 @@ public class ValueCGVisitor {
      *      expression2.type.convertTo(type);
      *
      *
+     ****************+ LAB12
+     * ------ EXPRESSIONS
+     * - indexing
+     * - fieldAccess
+     *
+     * value [[ Indexing: expression1 -> expression2 expression3 ]]:
+     *      address [[ expression1 ]]
+     *      <load > expression1.type.suffix()
+     *
+     *
+     * value [[ FieldAccess: expression1: expression2 ID ]]:
+     *      address [[ expression1 ]]
+     *      <load > expression2.type.suffix()
+     *
      */
+
+    AddressCGVisitor addressVisitor;
+
+    public ValueCGVisitor(CodeGenerator cg) {
+        super(cg);
+        this.addressVisitor = new AddressCGVisitor(cg, this);
+    }
+
+    @Override
+    public Void visit(IntLiteral intLiteral, Void param) {
+        cg.pushInt(intLiteral.getValue());
+
+        return null;
+    }
+
+    @Override
+    public Void visit(CharLiteral charLiteral, Void param) {
+        cg.pushByte((int) charLiteral.getValue());
+
+        return null;
+    }
+
+    @Override
+    public Void visit(DoubleLiteral doubleLiteral, Void param) {
+        cg.pushFloat(doubleLiteral.getValue());
+
+        return null;
+    }
+
+    @Override
+    public Void visit(Variable variable, Void param) {
+        variable.accept(addressVisitor, null);
+
+        cg.load(variable.getType());
+
+        return null;
+    }
+
+    @Override
+    public Void visit(Arithmetic arith, Void param) {
+        // (superType: new responsibility, take two types and return the "greater" one)
+        Type superType = arith.getType().superType(arith.getLeft().getType());
+
+        arith.getLeft().accept(this, null);
+        cg.convert(arith.getLeft().getType(), superType);
+
+        arith.getRight().accept(this, null);
+        cg.convert(arith.getRight().getType(), superType);
+
+        cg.arithmetic(arith.getOperator(), superType);
+
+        return null;
+    }
+
+    @Override
+    public Void visit(Comparison comparison, Void param) {
+        Type superType = comparison.getLeft().getType().superType(comparison.getRight().getType());
+
+        comparison.getLeft().accept(this, null);
+        cg.convert(comparison.getLeft().getType(), superType);
+
+        comparison.getRight().accept(this, null);
+        cg.convert(comparison.getRight().getType(), superType);
+
+        cg.compare(comparison.getOperator(), superType);
+
+        return null;
+    }
+
+    @Override
+    public Void visit(Logical logical, Void param) {
+
+        logical.getLeft().accept(this, null);
+        logical.getRight().accept(this, null);
+
+        cg.logical(logical.getOperator());
+
+        return null;
+    }
+
+    @Override
+    public Void visit(Cast cast, Void param) {
+        cast.getExpr().accept(this, null);
+        cg.convert(cast.getExpr().getType(), cast.getCastType());
+
+        return null;
+    }
+
 }
